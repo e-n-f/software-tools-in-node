@@ -1,4 +1,8 @@
+#!/usr/local/bin/node
+
 // charcount - count characters in standard input
+
+'use strict';
 
 let nc = 0;
 
