@@ -6,8 +6,8 @@ async function cat(fd) {
 	var b = Buffer.alloc(2000);
 
 	var n;
-	while ((n = await fse.read(fd, b, 0, b.length)).bytesRead > 0) {
-		await fse.write(1, b, 0, n.bytesRead);
+	while ((n = (await fse.read(fd, b, 0, b.length)).bytesRead) > 0) {
+		await fse.write(1, b, 0, n);
 	}
 }
 
