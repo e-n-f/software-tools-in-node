@@ -3,11 +3,11 @@
 const fse = require('fs-extra');
 
 exports.open = async function(name, mode) {
-	return fse.open(name, mode);
+	return await fse.open(name, mode);
 };
 
 exports.close = async function(fd) {
-	return fse.close(fd);
+	return await fse.close(fd);
 };
 
 exports.read = async function(fd, buf, off, len) {
