@@ -3,11 +3,11 @@
 const io = require('./io.js');
 
 async function cat(fp) {
-	var b = Buffer.alloc(2000);
+	let b = Buffer.alloc(2000);
 
-	var n;
+	let n;
 	while ((n = await fp.fread(b, 0, b.length)) > 0) {
-		var off = 0;
+		let off = 0;
 		while (off < n) {
 			off += await io.stdout.fwrite(b, off, n - off);
 		}
@@ -18,8 +18,8 @@ async function main() {
 	if (process.argv.length <= 2) {
 		await cat(io.stdin);
 	} else {
-		for (var i = 2; i < process.argv.length; i++) {
-			var fp = await io.fopen(process.argv[i], 'r');
+		for (let i = 2; i < process.argv.length; i++) {
+			let fp = await io.fopen(process.argv[i], 'r');
 			await cat(fp);
 			await fp.fclose();
 		}
