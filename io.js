@@ -2,12 +2,12 @@
 
 const fse = require('fs-extra');
 
-module.exports.open = function(name, mode) {
-	return fse.open(name, mode);
+module.exports.open = async function(name, mode) {
+	return await fse.open(name, mode);
 };
 
-module.exports.close = function(fd) {
-	return fse.close(fd);
+module.exports.close = async function(fd) {
+	return await fse.close(fd);
 };
 
 module.exports.read = async function(fd, buf, off, len) {
