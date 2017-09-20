@@ -7,7 +7,6 @@ async function cat(fp) {
 	while ((c = await fp.getc()) != io.EOF) {
 		await io.stdout.putc(c);
 	}
-	await io.stdout.fflush();
 }
 
 async function main() {
