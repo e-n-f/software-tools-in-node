@@ -19,28 +19,21 @@ exports.write = async function(fd, buf, off, len) {
 };
 
 exports.FILE = function(fd) {
+	this.file = fd;
 	this.buffer = Buffer.alloc(512);
 	this.head = 0;
 	this.tail = 0;
-	this.file = fd;
-	this.eof = 0;
+	this.eof = false;
 
 	this.flsbuf = async function(c) {
-		let rn = this.tail - this.head;
-		let n = rn;
-
-		if (n > 0) {
-			n = await exports.write(this.file, this.buffer, this.head, n);
-			this.head = this.tail = 0;
+		if (this.tail > this.head) {
+			await exports.write(this.file, this.buffer, this.head, this.tail - this.head);
 		}
 
-		this.tail = this.buffer.length;
-		this.buffer[this.head++] = c;
+		this.head = 0;
+		this.tail = 0;
 
-		if (n != rn) {
-			throw new Exception();
-		}
-
+		this.buffer[this.tail++] = c;
 		return c;
 	};
 
@@ -52,6 +45,7 @@ exports.FILE = function(fd) {
 		this.head = 0;
 		this.tail = await exports.read(this.file, this.buffer, this.head, this.buffer.length);
 		if (this.tail <= 0) {
+			this.eof = true;
 			return exports.EOF;
 		}
 
@@ -77,31 +71,9 @@ exports.FILE = function(fd) {
 		return c;
 	}
 
-	this.fread = async function(buf, off, len) {
-		let n = 0;
-
-		for (let i = off; i < off + len; i++) {
-			if ((buf[i] = await this.getc()) >= 0) {
-				n++;
-			} else {
-				break;
-			}
-		}
-
-		return n;
-	};
-
-	this.fwrite = async function(buf, off, len) {
-		let n = 0;
-
-		for (let i = off; i < off + len; i++) {
-			if (await this.putc(buf[i]) >= 0) {
-				n++;
-			}
-		}
-
-		return n;
-	};
+	this.fflush = async function() {
+		return await this.flsbuf();
+	}
 
 	this.fclose = async function() {
 		return await exports.close(fd);

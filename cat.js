@@ -3,15 +3,11 @@
 const io = require('./io.js');
 
 async function cat(fp) {
-	let b = Buffer.alloc(2000);
-
-	let n;
-	while ((n = await fp.fread(b, 0, b.length)) > 0) {
-		let off = 0;
-		while (off < n) {
-			off += await io.stdout.fwrite(b, off, n - off);
-		}
+	let c;
+	while ((c = await fp.getc()) != io.EOF) {
+		await io.stdout.putc(c);
 	}
+	await io.stdout.fflush();
 }
 
 async function main() {
