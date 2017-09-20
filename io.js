@@ -20,23 +20,22 @@ exports.write = async function(fd, buf, off, len) {
 
 exports.FILE = function(fd) {
 	this.buffer = Buffer.alloc(512);
-	this.base = 0;
-	this.ptr = 0;
-	this.cnt = this.buffer.length;
+	this.head = 0;
+	this.tail = 0;
 	this.file = fd;
+	this.eof = 0;
 
 	this.flsbuf = async function(c) {
-		let rn = this.ptr - this.base;
+		let rn = this.tail - this.head;
 		let n = rn;
 
 		if (n > 0) {
-			n = await exports.write(this.file, this.buffer, this.base, n);
-			this.ptr = this.base;
+			n = await exports.write(this.file, this.buffer, this.head, n);
+			this.head = this.tail = 0;
 		}
 
-		this.cnt = this.buffer.length - 1;
-		this.buffer[this.base++] = c;
-		this.ptr = base;
+		this.tail = this.buffer.length;
+		this.buffer[this.head++] = c;
 
 		if (n != rn) {
 			throw new Exception();
@@ -46,19 +45,22 @@ exports.FILE = function(fd) {
 	};
 
 	this.filbuf = async function() {
-		this.ptr = this.base;
-		this.cnt = await exports.read(this.file, this.buffer, this.ptr, this.buffer.length);
-		if (this.cnt < 0) {
-			this.cnt = 0;
+		if (this.eof) {
 			return exports.EOF;
 		}
 
-		return this.buffer[this.ptr++];
+		this.head = 0;
+		this.tail = await exports.read(this.file, this.buffer, this.head, this.buffer.length);
+		if (this.tail <= 0) {
+			return exports.EOF;
+		}
+
+		return this.buffer[this.head++];
 	};
 
 	this.putc = async function(c) {
-		if (this.cnt-- >= 0) {
-			this.buffer[this.ptr++] = c;
+		if (this.tail < this.buffer.length) {
+			this.buffer[this.tail++] = c;
 			return c;
 		} else {
 			return await this.flsbuf(c);
@@ -66,23 +68,39 @@ exports.FILE = function(fd) {
 	};
 
 	this.getc = async function() {
-		if (this.cnt-- >= 0) {
-			return this.buffer[this.ptr++];
+		let c;
+		if (this.tail > this.head) {
+			c = this.buffer[this.head++];
 		} else {
-			return await this.filbuf();
+			c = await this.filbuf();
 		}
+		return c;
 	}
 
 	this.fread = async function(buf, off, len) {
+		let n = 0;
+
 		for (let i = off; i < off + len; i++) {
-			buf[i] = await this.getc();
+			if ((buf[i] = await this.getc()) >= 0) {
+				n++;
+			} else {
+				break;
+			}
 		}
+
+		return n;
 	};
 
 	this.fwrite = async function(buf, off, len) {
+		let n = 0;
+
 		for (let i = off; i < off + len; i++) {
-			await this.putc(buf[i]);
+			if (await this.putc(buf[i]) >= 0) {
+				n++;
+			}
 		}
+
+		return n;
 	};
 
 	this.fclose = async function() {
