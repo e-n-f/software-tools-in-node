@@ -2,8 +2,15 @@
 
 // copy - copy input characters to output
 
-'use strict';
+"use strict";
 
-process.stdin.on('data', (text) => {
-	process.stdout.write(text);
-});
+const unixio = require("unixio");
+
+async function main() {
+	let c;
+	while ((c = await unixio.stdin.getc()) != unixio.EOF) {
+		await unixio.stdout.putc(c);
+	}
+}
+
+unixio.call(main);

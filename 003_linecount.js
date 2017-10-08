@@ -2,17 +2,21 @@
 
 // linecount - count lines in standard input
 
-'use strict';
+"use strict";
 
-let nl = 0;
+const unixio = require("unixio");
 
-process.stdin.on('data', (text) => {
-	let s = text.toString('utf-8');
-	for (let i = 0; i < s.length; i++) {
-		if (s[i] == '\n') {
+async function main() {
+	let nl = 0;
+
+	let c;
+	while ((c = await unixio.stdin.getc()) != unixio.EOF) {
+		if (c == 10) {
 			nl++;
 		}
 	}
-}).on('end', () => {
-	process.stdout.write(Buffer(nl + '\n'));
-});
+
+	await unixio.stdout.puts(nl + "\n");
+}
+
+unixio.call(main);

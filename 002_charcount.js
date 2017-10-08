@@ -2,13 +2,19 @@
 
 // charcount - count characters in standard input
 
-'use strict';
+"use strict";
 
-let nc = 0;
+const unixio = require("unixio");
 
-process.stdin.on('data', (text) => {
-	let s = text.toString('utf-8');
-	nc += s.length;
-}).on('end', () => {
-	process.stdout.write(Buffer(nc + '\n'));
-});
+async function main() {
+	let nc = 0;
+
+	let c;
+	while ((c = await unixio.stdin.getc()) != unixio.EOF) {
+		nc++;
+	}
+
+	await unixio.stdout.puts(nc + "\n");
+}
+
+unixio.call(main);

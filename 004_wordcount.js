@@ -2,22 +2,25 @@
 
 // wordcount - count words in standard input
 
-'use strict';
+"use strict";
 
-let wc = 0, inword = false;
+const unixio = require("unixio");
 
-process.stdin.on('data', (text) => {
-	let s = text.toString('utf-8');
-	for (let i = 0; i < s.length; i++) {
-		let c = s[i];
+async function main() {
+	let wc = 0;
+	let inword = false;
 
-		if (c == ' ' || c == '\n' || c == '\t') {
+	let c;
+	while ((c = await unixio.stdin.getc()) != unixio.EOF) {
+		if (c == 32 || c == 10 || c == 9) {
 			inword = false;
 		} else if (!inword) {
 			inword = true;
 			wc++;
 		}
 	}
-}).on('end', () => {
-	process.stdout.write(Buffer(wc + '\n'));
-});
+
+	await unixio.stdout.puts(wc + "\n");
+}
+
+unixio.call(main);
