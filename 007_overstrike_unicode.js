@@ -22,9 +22,18 @@ async function main() {
 	while ((u = await unixio.stdin.getu()) != unixio.EOF) {
 		let u2 = await unixio.stdin.peeku();
 
-		if (u2 == BS) {
+		if (u != BS && u2 == BS) {
+			// eat backspace
 			u2 = await unixio.stdin.getu();
+			// get character after backspace
 			u2 = await unixio.stdin.getu();
+
+			if (u2 == BS) {
+				await unixio.stdout.putu(u);
+				await unixio.stdout.putu(BS);
+				await unixio.stdout.putu(BS);
+				continue;
+			}
 
 			// Look for underscore as either 1st or second character
 			let ul = false;
