@@ -18,8 +18,6 @@ const LCA = "a".codePointAt(0);
 const LCZ = "z".codePointAt(0);
 
 async function main() {
-	let col = 0;
-
 	let u;
 	while ((u = await unixio.stdin.getu()) != unixio.EOF) {
 		let u2 = await unixio.stdin.peeku();
