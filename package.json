@@ -14,7 +14,7 @@
     "tools"
   ],
   "dependencies": {
-    "unixio": "^0.4.1"
+    "unixio": "^0.5.1"
   },
   "author": "Eric Fischer",
   "license": "BSD-2-Clause"

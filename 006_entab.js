@@ -6,58 +6,62 @@
 
 const unixio = require("unixio");
 
+const NL = "\n".codePointAt(0);
+const SPC = " ".codePointAt(0);
+const TAB = "\t".codePointAt(0);
+
 async function main() {
 	let col = 0;
 
-	let c;
-	while ((c = await unixio.stdin.getc()) != unixio.EOF) {
-		if (c == 32) {
+	let u;
+	while ((u = await unixio.stdin.getu()) != unixio.EOF) {
+		if (u == SPC) {
 			let start = col;
 			col++;
 
 			if (col % 8 == 0) {
-				await unixio.stdout.putc(32);
+				await unixio.stdout.putu(SPC);
 				start = col;
 			}
 
-			while ((c = await unixio.stdin.getc()) != unixio.EOF) {
-				if (c == 32) {
+			while ((u = await unixio.stdin.getu()) != unixio.EOF) {
+				if (u == SPC) {
 					col++;
 
 					if (col % 8 == 0) {
 						if (col - start > 2) {
-							await unixio.stdout.putc(9);
+							await unixio.stdout.putu(TAB);
 						} else {
 							let i;
 							for (i = start; i < col; i++) {
-								await unixio.stdout.putc(32);
+								await unixio.stdout.putu(SPC);
 							}
 						}
 
 						start = col;
 					}
 				} else {
-					await unixio.stdin.ungetc(c);
+					await unixio.stdin.ungetu(u);
 					break;
 				}
 			}
 
 			let i;
 			for (i = start; i < col; i++) {
-				await unixio.stdout.putc(32);
+				await unixio.stdout.putu(SPC);
 			}
-		} else if (c == 9) {
-			await unixio.stdout.putc(c);
+		} else if (u == TAB) {
+			await unixio.stdout.putu(u);
 			col++;
 
 			while (col % 8 != 0) {
 				col++;
 			}
-		} else if (c == 10) {
-			await unixio.stdout.putc(c);
+		} else if (u == NL) {
+			await unixio.stdout.putu(u);
 			col = 0;
 		} else {
-			await unixio.stdout.putc(c);
+			await unixio.stdout.putu(u);
 			col++;
 		}
 	}

@@ -5,13 +5,14 @@
 "use strict";
 
 const unixio = require("unixio");
+const NL = "\n".codePointAt(0);
 
 async function main() {
 	let nl = 0;
 
-	let c;
-	while ((c = await unixio.stdin.getc()) != unixio.EOF) {
-		if (c == 10) {
+	let u;
+	while ((u = await unixio.stdin.getu()) != unixio.EOF) {
+		if (u == NL) {
 			nl++;
 		}
 	}

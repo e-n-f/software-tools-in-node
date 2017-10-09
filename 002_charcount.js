@@ -9,8 +9,8 @@ const unixio = require("unixio");
 async function main() {
 	let nc = 0;
 
-	let c;
-	while ((c = await unixio.stdin.getc()) != unixio.EOF) {
+	let u;
+	while ((u = await unixio.stdin.getu()) != unixio.EOF) {
 		nc++;
 	}
 
