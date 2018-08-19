@@ -37,14 +37,15 @@ async function main() {
 
 					let j;
 					for (j = 0; j < len; j++) {
-						await unixio.stdout.putb(dictionary[where + j % DICTSIZE]);
-						newtext.push(dictionary[where + j % DICTSIZE]);
+						await unixio.stdout.putb(dictionary[(where + j) % DICTSIZE]);
+						newtext.push(dictionary[(where + j) % DICTSIZE]);
 					}
 
 					for (j = 0; j < len; j++) {
 						dictionary[(dict_where + j) % DICTSIZE] = newtext[j];
-						dict_where = (dict_where + 1) % DICTSIZE;
 					}
+
+					dict_where = (dict_where + j) % DICTSIZE;
 				}
 			}
 		}
