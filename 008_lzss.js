@@ -6,8 +6,8 @@
 
 const unixio = require("unixio");
 
-const BUFSIZE = 256;
-const DICTSIZE = 256;
+const BUFSIZE = 18;
+const DICTSIZE = 4096;
 
 async function flush(outsize, outtype, outbuf) {
 	let i;
@@ -71,7 +71,7 @@ async function main() {
 
 		if (bestlen > 2) {
 			outtype[outsize] = 1;
-			outbuf[outsize] = best | (bestlen << 8);
+			outbuf[outsize] = best | ((bestlen - 3) << 12);
 			outsize++;
 
 			for (i = 0; i < bestlen; i++) {

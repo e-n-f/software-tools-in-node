@@ -6,7 +6,7 @@
 
 const unixio = require("unixio");
 
-const DICTSIZE = 256;
+const DICTSIZE = 4096;
 
 async function main() {
 	let b;
@@ -29,8 +29,11 @@ async function main() {
 					dict_where = (dict_where + 1) % DICTSIZE;
 				}
 			} else {
-				let len = await unixio.stdin.getb();
-				let where = await unixio.stdin.getb();
+				let hi = await unixio.stdin.getb();
+				let lo = await unixio.stdin.getb();
+
+				let len = (hi >> 4) + 3;
+				let where = lo | ((hi & 0x0F) << 8);
 
 				if (len != unixio.EOF) {
 					let newtext = [];
