@@ -40,6 +40,7 @@ async function main() {
 	let dictionary = [];
 	dictionary.length = DICTSIZE;
 	let dict_where = 0;
+	let candidates = {};
 
 	// Fill lookahead
 
@@ -50,22 +51,29 @@ async function main() {
 
 	while (buf.length > 0) {
 		let best = -1;
-		let bestlen = -1;
+		let bestlen = 0;
 
-		let i;
-		for (i = 0; i < DICTSIZE; i++) {
-			if (dictionary[i] === buf[0]) {
-				let j;
-				for (j = 1; j < BUFSIZE; j++) {
-					if (dictionary[(i + j) % DICTSIZE] != buf[j]) {
-						break;
-					}
-				}
+		let key = String.fromCharCode(buf[0]) +
+		          String.fromCharCode(buf[1]) +
+		          String.fromCharCode(buf[2]);
 
-				if (j > bestlen) {
-					bestlen = j;
-					best = i;
+		for (let i in candidates[key]) {
+			i = Number(i);
+
+			let j;
+			for (j = 0; j < BUFSIZE; j++) {
+				if (dictionary[(i + j) % DICTSIZE] != buf[j]) {
+					break;
 				}
+			}
+
+			if (j > bestlen) {
+				bestlen = j;
+				best = i;
+			}
+
+			if (bestlen == BUFSIZE) {
+				break;
 			}
 		}
 
@@ -73,23 +81,45 @@ async function main() {
 			outtype[outsize] = 1;
 			outbuf[outsize] = best | ((bestlen - 3) << 12);
 			outsize++;
-
-			for (i = 0; i < bestlen; i++) {
-				dictionary[dict_where] = buf[i];
-				dict_where = (dict_where + 1) % DICTSIZE;
-			}
-
-			buf.splice(0, bestlen);
 		} else {
 			outtype[outsize] = 0;
 			outbuf[outsize] = buf[0];
 			outsize++;
 
-			dictionary[dict_where] = buf[0];
-			dict_where = (dict_where + 1) % DICTSIZE;
-
-			buf.splice(0, 1);
+			bestlen = 1;
 		}
+
+		for (let i = 0; i < bestlen; i++) {
+			for (let j = 0; j < 3; j++) {
+				let key1 = String.fromCharCode(dictionary[(dict_where + DICTSIZE - 2 + j) % DICTSIZE]) +
+				           String.fromCharCode(dictionary[(dict_where + DICTSIZE - 1 + j) % DICTSIZE]) +
+				           String.fromCharCode(dictionary[(dict_where + DICTSIZE - 0 + j) % DICTSIZE]);
+
+				if (candidates[key1] === undefined) {
+					candidates[key1] = {};
+				}
+
+				delete candidates[key1][(dict_where + DICTSIZE - 2) % DICTSIZE];
+			}
+
+			dictionary[dict_where] = buf[i];
+
+			for (let j = 0; j < 3; j++) {
+				let key1 = String.fromCharCode(dictionary[(dict_where + DICTSIZE - 2 + j) % DICTSIZE]) +
+				           String.fromCharCode(dictionary[(dict_where + DICTSIZE - 1 + j) % DICTSIZE]) +
+				           String.fromCharCode(dictionary[(dict_where + DICTSIZE - 0 + j) % DICTSIZE]);
+
+				if (candidates[key1] === undefined) {
+					candidates[key1] = {};
+				}
+
+				candidates[key1][(dict_where + DICTSIZE - 2) % DICTSIZE] = 1;
+			}
+
+			dict_where = (dict_where + 1) % DICTSIZE;
+		}
+
+		buf.splice(0, bestlen);
 
 		if (outsize == 8) {
 			await flush(outsize, outtype, outbuf);
